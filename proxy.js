@@ -75,7 +75,9 @@ function normalizeToolOutput(output) {
   const collect = (part) => {
     if (!part || typeof part !== 'object') return;
     if (part.type === 'input_image' && typeof part.image_url === 'string') {
-      imageParts.push(part);
+      // Rebuild with whitelisted fields only: strict gateways reject extra
+      // keys on content parts (e.g. view_image's "detail":"original").
+      imageParts.push({ type: 'input_image', image_url: part.image_url });
     } else if (typeof part.text === 'string' && (part.type === 'output_text' || part.type === 'input_text')) {
       texts.push(part.text);
     }
@@ -107,6 +109,24 @@ function pushImageMessages(kept, imageParts, dropped) {
     ],
   });
   dropped.push(`image-output->message x${imageParts.length}`);
+}
+
+// Same whitelist rule applies to content parts of kept message items (e.g.
+// user-attached images carrying "detail"). Returns a new item only when a
+// part was actually rebuilt, so the caller can flag inputChanged.
+function cleanItemParts(item) {
+  if (!item || item.type !== 'message' || !Array.isArray(item.content)) return item;
+  let changed = false;
+  const content = item.content.map((part) => {
+    if (part && typeof part === 'object' && part.type === 'input_image' && typeof part.image_url === 'string') {
+      const keys = Object.keys(part);
+      if (keys.length === 2 && keys.includes('type') && keys.includes('image_url')) return part;
+      changed = true;
+      return { type: 'input_image', image_url: part.image_url };
+    }
+    return part;
+  });
+  return changed ? { ...item, content } : item;
 }
 
 function sanitize(body) {
@@ -145,7 +165,9 @@ function sanitize(body) {
         inputChanged = true;
         dropped.push('history:fn_output->string');
       } else if (KEEP_INPUT_TYPES.has(t)) {
-        kept.push(item);
+        const cleaned = cleanItemParts(item);
+        if (cleaned !== item) inputChanged = true;
+        kept.push(cleaned);
       } else if (t === 'additional_tools') {
         // Flatten the deferred tool registry into top-level tools. Entries may
         // be namespaces (recurse) or plain tools (function/custom) directly.

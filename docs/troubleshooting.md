@@ -26,14 +26,20 @@ set `DUMP=1` to also write full request bodies to `dump-*.json`.
   string. Codex's image-viewing tool returns an array of content parts
   (`input_image` with base64) — gateways accept images only inside **user
   message** content, and require `output` to be a string.
+- **Cause (also):** extra fields on message content parts. Strict gateways
+  whitelist part fields — an `input_image` carrying `"detail":"original"`
+  (added when the model requests high-detail views) fails the whole `input`
+  array. Same error text, different trap.
 - **Cause (also):** history contains item types the gateway doesn't list —
   `custom_tool_call`, `custom_tool_call_output`, `reasoning`,
   `additional_tools`, `agent_message`.
 - **Fix:** automatic — `normalizeToolOutput()` stringifies `output` and moves
-  `input_image` parts into a following user message; `custom_tool_call*`
-  items are re-encoded as `function_call*` (with `ctco_` → `fc_` id prefixes);
-  unknown item types are dropped. If it persists, grab `dump-*.json` and
-  inspect which item the gateway still dislikes.
+  `input_image` parts (re-built with `type` + `image_url` only) into a
+  following user message; kept messages get the same part whitelist;
+  `custom_tool_call*` items are re-encoded as `function_call*` (with
+  `ctco_` → `fc_` id prefixes); unknown item types are dropped. If it
+  persists, grab `dump-*.json` and inspect which item the gateway still
+  dislikes.
 
 ### `tool_choice requires tools to be provided`
 

@@ -49,8 +49,11 @@ Three layers:
    - `function_call_output` with non-string `output` → stringify via
      `normalizeToolOutput()`; `input_image` parts are appended as a user
      message (`pushImageMessages`) because gateways accept images in user
-     message content but not in tool output.
-   - `message` / `function_call` / `function_call_output` → kept as-is.
+     message content but not in tool output. Parts are rebuilt with
+     `type` + `image_url` only — strict gateways reject extra keys like
+     `detail:"original"`.
+   - `message` / `function_call` / `function_call_output` → kept as-is
+     (message content parts get the same `input_image` field whitelist).
    - `additional_tools` → namespaces flattened into `body.tools`.
    - `instructions` item → rebuilt as a `system` message.
    - `custom_tool_call` → `function_call` with

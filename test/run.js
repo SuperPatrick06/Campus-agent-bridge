@@ -123,6 +123,27 @@ ok('image array output -> string output + image user message', () => {
   assert(msg, 'image message appended');
   assert(dropped.some((d) => d.startsWith('image-output->message')));
 });
+ok('extra fields on input_image parts are stripped (e.g. detail)', () => {
+  const b = baseInput({
+    input: [
+      { type: 'custom_tool_call_output', call_id: 'c1', id: 'ctco_1', output: [{ type: 'input_image', image_url: 'data:image/png;base64,QQ==', detail: 'original' }] },
+    ],
+  });
+  sanitize(b);
+  const msg = b.input.find((i) => i.type === 'message' && Array.isArray(i.content) && i.content.some((p) => p.type === 'input_image'));
+  const part = msg.content.find((p) => p.type === 'input_image');
+  assert.deepStrictEqual(part, { type: 'input_image', image_url: 'data:image/png;base64,QQ==' });
+});
+ok('kept message image parts cleaned even at same input length (regression)', () => {
+  const b = baseInput({
+    input: [
+      { type: 'message', role: 'user', content: [{ type: 'input_text', text: 'look' }, { type: 'input_image', image_url: 'data:image/png;base64,QQ==', detail: 'original' }] },
+    ],
+  });
+  sanitize(b);
+  const part = b.input[0].content.find((p) => p.type === 'input_image');
+  assert.deepStrictEqual(part, { type: 'input_image', image_url: 'data:image/png;base64,QQ==' });
+});
 ok('non-string function_call_output normalized to string', () => {
   const b = baseInput({
     input: [{ type: 'function_call_output', call_id: 'c1', output: [{ type: 'output_text', text: 'ok' }] }],
@@ -195,6 +216,13 @@ function strictReject(body) {
     if (it.type === 'function_call_output' && typeof it.output !== 'string') {
       return 'input must be a non-empty string or an array of supported message/function items';
     }
+    if (it.type === 'message' && Array.isArray(it.content)) {
+      for (const p of it.content) {
+        if (p && p.type === 'input_image' && Object.keys(p).sort().join(',') !== 'image_url,type') {
+          return 'input must be a non-empty string or an array of supported message/function items';
+        }
+      }
+    }
   }
   if (Array.isArray(body.tools)) {
     for (const t of body.tools) if (t.type !== 'function') return `type must be one of the following values: function`;
@@ -257,7 +285,7 @@ async function e2e() {
       input: [
         { type: 'additional_tools', role: 'assistant', tools: [{ type: 'custom', name: 'exec', description: 'run' }] },
         { type: 'custom_tool_call', call_id: 'k1', name: 'exec', input: 'dir' },
-        { type: 'custom_tool_call_output', call_id: 'k1', id: 'ctco_1', output: [{ type: 'input_image', image_url: 'data:image/png;base64,QQ==' }] },
+        { type: 'custom_tool_call_output', call_id: 'k1', id: 'ctco_1', output: [{ type: 'input_image', image_url: 'data:image/png;base64,QQ==', detail: 'original' }] },
         { type: 'reasoning', id: 'r1', summary: [] },
       ],
     };
