@@ -119,8 +119,9 @@ npm test        # 跑测试（单元 + 端到端）
 
 3. **`input must be a non-empty string or an array of supported
    message/function items`** —— 看图后 Codex 发送的工具输出是数组（含
-   `input_image`），网关只收字符串。→ 输出被字符串化，图片挪进 user 消息，
-   模型照样看得见。
+   `input_image`），网关只收字符串；而且 `input_image` 分片上多一个字段
+   （如 `detail:"original"`）同样触发这个报错。→ 输出被字符串化，图片挪进
+   user 消息并重建为只含 `type` + `image_url` 的分片，模型照样看得见。
 
 每个报错在 [docs/troubleshooting.md](docs/troubleshooting.md) 都有完整条目
 （报错 → 原因 → 修法）。

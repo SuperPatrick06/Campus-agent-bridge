@@ -130,9 +130,10 @@ The proxy handles all three automatically:
 
 3. **`input must be a non-empty string or an array of supported
    message/function items`** — viewing an image makes Codex send a non-string
-   tool output (array of content parts), which gateways reject. → output is
-   stringified and the image rides along in a user message, so the model
-   still sees it.
+   tool output (array of content parts), which gateways reject — and extra
+   fields on those parts (like `detail:"original"`) trip the same error.
+   → output is stringified and the image rides along in a user message with
+   a whitelisted part shape, so the model still sees it.
 
 Every error has a full entry in [docs/troubleshooting.md](docs/troubleshooting.md)
 (error → cause → fix).
