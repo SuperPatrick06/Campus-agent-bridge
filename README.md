@@ -1,45 +1,53 @@
 <div align="center">
 
-# 🌉 campus-agent-bridge
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset=".github/assets/banner-light.svg">
+  <img alt="campus-agent-bridge — give any chat-only AI gateway real agent powers" src=".github/assets/banner-dark.svg" width="100%">
+</picture>
 
 ### Give any chat-only AI gateway real **agent** powers
 
-Your school or company issues an OpenAI-compatible API key. Codex wants to plan,
-run commands, and edit files. They speak different dialects of the same protocol —
-this tiny local proxy translates between them.
+[![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE)
+[![Node.js ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-22c55e?style=flat-square)](https://nodejs.org)
+[![Dependencies](https://img.shields.io/badge/dependencies-0-a855f7?style=flat-square)](package.json)
+[![Tests](https://img.shields.io/badge/tests-21%20passing-22c55e?style=flat-square)](test/run.js)
+
+Your school or company hands you an OpenAI-compatible **chat** API — great for
+asking questions, useless as a coding agent. [Codex](https://github.com/openai/codex)
+can plan, run commands and edit files, but only if the endpoint accepts its full
+**Responses** dialect. They speak two dialects of the same protocol — this tiny
+local proxy translates between them.
 
 **Zero gateway changes · Zero cloud relay · Zero npm dependencies**
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-2d8cff)](LICENSE)
-[![Node.js ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-339933)](https://nodejs.org)
-[![npm dependencies](https://img.shields.io/badge/npm%20deps-0-blueviolet)](package.json)
-[![Tests](https://img.shields.io/badge/tests-19%20passed-brightgreen)](test/run.js)
+**English** · [简体中文](README.zh-CN.md)
 
-🌐 **English** | [简体中文](README.zh-CN.md)
-
-[✨ Features](#-features) · [🚀 Quick Start](#-quick-start) · [🧭 How It Works](#-how-it-works) · [⚠️ Pitfalls](#%EF%B8%8F-the-three-pitfalls) · [🔒 Privacy](#-privacy)
+[Why](#why) · [How it works](#how-it-works) · [Features](#features) · [Quick start](#quick-start) · [Pitfalls](#the-three-pitfalls) · [Privacy](#privacy)
 
 </div>
 
 ---
 
-## 😩 The Problem
+## Why
 
-Institutional AI platforms (universities, companies) usually expose an
-OpenAI-compatible **chat** API — great for asking questions, useless as a
-coding agent. Meanwhile, agents like [Codex](https://github.com/openai/codex)
-can plan, execute shell commands, edit your repo and iterate… but only if the
-API accepts its full **Responses** dialect. Strict gateways don't:
+Institutional AI platforms (universities, companies) usually expose a strict
+subset of the OpenAI API: enough for chat, not enough for an agent. Codex keeps
+sending things the gateway has never heard of — and the gateway answers with
+errors like these:
 
 | What Codex sends | What the gateway replies |
 |---|---|
 | `include`, `prompt_cache_key`, `client_metadata`, … | ❌ `property include should not exist` |
-| tool output containing images | ❌ `input must be a non-empty string...` |
+| tool output containing images | ❌ `input must be a non-empty string…` |
 | `custom_tool_call` history items | ❌ not a "supported message/function item" |
 | `custom` / `namespace` tool types | ❌ only `type: "function"` allowed |
 
-**campus-agent-bridge** runs on `127.0.0.1` between them: it cleans requests
-before they reach the gateway, and rewrites responses back into Codex's dialect.
+**campus-agent-bridge** runs on `127.0.0.1` between them: it cleans every
+request before the gateway sees it, and rewrites every response back into
+Codex's dialect.
+
+## How it works
 
 ```
 ┌────────────┐  Responses API   ┌───────────────────────────┐  strict subset  ┌─────────┐
@@ -51,45 +59,36 @@ before they reach the gateway, and rewrites responses back into Codex's dialect.
 ```
 
 The gateway stays the **brain**; the tools execute locally on your machine.
+Full protocol walkthrough: [docs/how-it-works.md](docs/how-it-works.md).
 
-## ✨ Features
+## Features
 
-- 🧼 **Protocol sanitizer** — strips unknown params, trims `reasoning` / `text`,
-  whitelists history items, flattens tool namespaces
-- 🖼️ **Image tools keep working** — image tool outputs are moved into user
-  messages (the only place strict gateways accept `input_image`), so the model
-  can still *see* the screenshots
-- 🔄 **Bidirectional tool translation** — `custom_tool_call` ⇄ `function_call`
-  on both request and response paths (JSON **and** SSE streams)
-- 🛡️ **Sandbox unlock** — generates the config Codex 0.16x needs; without it,
-  approvals are *silently* auto-rejected and the agent looks dead
-- 🔒 **Privacy by design** — your URL, key and model live only in gitignored
-  `./local/`; the proxy holds no keys and phones nothing home
-- 🧪 **Tested against a mock strict gateway** — 19 tests, including a full
-  end-to-end run through a gateway that enforces every real-world rule
-- ⚡ **Zero dependencies** — one `node` binary is enough; no `npm install`
-- 🩺 **Self-diagnosis** — `gab doctor` checks config, proxy and gateway connectivity
+| | | |
+|:---|:---|:---|
+| **Protocol sanitizer**<br>Strips unknown params, trims `reasoning` / `text`, whitelists history items, flattens tool namespaces | **Images keep working**<br>Image tool outputs ride along in user messages — the one shape strict gateways accept — so the model still sees your screenshots | **Tools translated both ways**<br>`custom_tool_call` ⇄ `function_call` on request *and* response paths, in JSON **and** SSE streams |
+| **Sandbox unlock**<br>Generates the config Codex 0.16x requires — without it, approvals are silently auto-rejected and the agent looks dead | **Zero dependencies**<br>One `node` binary is the entire runtime: no `npm install`, no supply chain | **Battle-tested**<br>21 tests, including a full end-to-end run in front of a mock gateway that enforces every real-world rule |
+| **Private by design**<br>URL, key and model live only in gitignored `./local/` — the proxy holds no keys and phones nobody | **Isolated sessions**<br>Your `~/.codex` is never touched — `codex-campus` boots Codex with its own `CODEX_HOME` | **Self-diagnosis**<br>`gab doctor` checks config, proxy and gateway connectivity in one shot |
 
-## 🚀 Quick Start
+## Quick start
 
-**Requirements:** [Node.js](https://nodejs.org) ≥ 18 ·
+**Requirements** — [Node.js](https://nodejs.org) ≥ 18 ·
 [Codex CLI](https://github.com/openai/codex) ≥ 0.16x · your gateway URL + key
 
 ```sh
 git clone https://github.com/SuperPatrick06/campus-agent-bridge.git
 cd campus-agent-bridge
-./codex-campus          # Windows: codex-campus.cmd
+./codex-campus        # Windows: codex-campus.cmd
 ```
 
-The **first run walks you through setup** (gateway URL → API key → model),
-then opens Codex. After that, typing `codex-campus` is all you need — it
-starts the local proxy automatically and drops you into an isolated session.
+The **first run walks you through setup** (gateway URL → API key → model) and
+opens Codex. From then on, `codex-campus` is all you need — it starts the local
+proxy automatically and drops you into an isolated session.
 
-> 💡 **Make it global:** add the folder to your `PATH` (Windows), or
+> **Make it global** — add the folder to your `PATH` (Windows), or
 > `ln -s "$PWD/codex-campus" /usr/local/bin/codex-campus` (macOS / Linux).
 
 <details>
-<summary><b>Manual commands</b> (same thing, one layer down)</summary>
+<summary><b>Manual commands</b> — the same thing, one layer down</summary>
 
 ```sh
 gab init        # interactive setup — writes ./local (gitignored)
@@ -101,10 +100,10 @@ npm test        # run the test suite (unit + end-to-end)
 
 </details>
 
-### 🧩 What `init` writes
+### What `init` writes
 
 | File | Purpose | Ever committed? |
-|---|---|---|
+|:---|:---|:---:|
 | `local/config.local.json` | gateway URL, key, model, port | ❌ gitignored |
 | `local/codex-home/config.toml` | isolated Codex config → proxy | ❌ gitignored |
 | `local/codex-home/models.json` | model catalog for your gateway's model | ❌ gitignored |
@@ -113,7 +112,7 @@ Your main `~/.codex` config is **never touched** — sessions launched via
 `codex-campus` use `CODEX_HOME=local/codex-home`, so any other providers and
 keys you keep there keep working exactly as before.
 
-## ⚠️ The Three Pitfalls
+## The three pitfalls
 
 Battle-tested fixes for what everyone hits with Codex × strict gateways.
 The proxy handles all three automatically:
@@ -138,25 +137,29 @@ The proxy handles all three automatically:
 Every error has a full entry in [docs/troubleshooting.md](docs/troubleshooting.md)
 (error → cause → fix).
 
-## 🔒 Privacy
+## Privacy
 
 Designed so that **nothing you type in setup ever leaves `./local/`**:
 
-- 🔑 The proxy holds no keys — it forwards Codex's `Authorization` header as-is
-- 📡 No telemetry; the only network calls go to *your* gateway
-- 🚫 No institution names, URLs or keys anywhere in the tracked source
-- 🧹 `DUMP=1` debug dumps (`dump-*.json`) are gitignored — delete them when done
-- ✅ Publish-time self-check:
+- **No keys held** — the proxy forwards Codex's `Authorization` header as-is
+- **No telemetry** — the only network calls go to *your* gateway
+- **No leaks** — no institution names, URLs or keys anywhere in the tracked source
+- **No leftovers** — `DUMP=1` debug dumps (`dump-*.json`) are gitignored — delete them when done
 
-  ```sh
-  grep -rniE 'yourname|yourschool|sk-[0-9a-f]{8}|[0-9]{1,3}(\.[0-9]{1,3}){3}' \
-    . --exclude-dir=local --exclude-dir=.git
-  ```
-
-## 🧪 Development
+<details>
+<summary><b>Publish-time self-check</b></summary>
 
 ```sh
-npm test                        # 19 tests: unit + mock-gateway end-to-end
+grep -rniE 'yourname|yourschool|sk-[0-9a-f]{8}|[0-9]{1,3}(\.[0-9]{1,3}){3}' \
+  . --exclude-dir=local --exclude-dir=.git
+```
+
+</details>
+
+## Development
+
+```sh
+npm test                        # 21 tests: unit + mock-gateway end-to-end
 node --check proxy.js bin/cli.js
 ```
 
@@ -166,7 +169,7 @@ function-only tools — and runs the real proxy in front of it.
 
 Contributions welcome — protocol fixes for other gateways especially!
 
-## ⚖️ Disclaimer
+## Disclaimer
 
 This is an independent community project, not affiliated with OpenAI or any
 institution. If your gateway belongs to a university or employer, **check that
@@ -174,12 +177,14 @@ their terms allow automated clients** — complying is on you. Agent sessions ca
 run local commands; review what the model does, as with any coding agent.
 Full text: [DISCLAIMER.md](DISCLAIMER.md) · Security: [SECURITY.md](SECURITY.md)
 
-## 📄 License
+## License
 
 [MIT](LICENSE) © campus-agent-bridge contributors.
 Model catalog data derived from [openai/codex](https://github.com/openai/codex)
 (Apache-2.0) — see [NOTICE](NOTICE).
 
 <div align="center">
-If this unlocked your campus AI — a ⭐ star would be lovely!
+<br>
+If this unlocked your campus AI — a ⭐ star would be lovely.
+<br><br>
 </div>
