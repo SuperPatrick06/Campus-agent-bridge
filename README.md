@@ -3,143 +3,136 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset=".github/assets/banner-light.svg">
-  <img alt="campus-agent-bridge — a bridge between Codex and your gateway" src=".github/assets/banner-dark.svg" width="100%">
+  <img alt="campus-agent-bridge — 架在 Codex 与网关之间的桥" src=".github/assets/banner-dark.svg" width="100%">
 </picture>
 
-### Give any chat-only AI gateway real **agent** powers
+### 把只有 chat 能力的 AI 网关，变成真正的 **agent**
 
-**Zero gateway changes · Zero cloud relay · Zero npm dependencies**
+**网关零改动 · 无云端中转 · 零 npm 依赖**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE) [![Node.js ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-22c55e?style=flat-square)](https://nodejs.org) [![Dependencies](https://img.shields.io/badge/dependencies-0-a855f7?style=flat-square)](package.json) [![Tests](https://img.shields.io/badge/tests-21%20passing-22c55e?style=flat-square)](test/run.js)
 
-**English** · [简体中文](README.zh-CN.md)
+[English](README.en.md) · **简体中文**
 
-[Why](#why) · [How it works](#how-it-works) · [Features](#features) · [Quick start](#quick-start) · [Pitfalls](#the-three-pitfalls) · [Privacy](#privacy)
+[痛点](#痛点) · [工作原理](#工作原理) · [特性](#特性) · [快速开始](#快速开始) · [三个坑](#三个经典坑) · [隐私](#隐私)
 
 </div>
 
 ---
 
-## Why
+## 痛点
 
-Your school or company hands you an OpenAI-compatible **chat** API — great for
-asking questions, useless as a coding agent. [Codex](https://github.com/openai/codex)
-can plan, run commands and edit files, but only if the endpoint accepts its full
-**Responses** dialect. Codex keeps sending things the gateway has never heard
-of — and the gateway answers with errors like these:
+学校 / 公司发给你一个 OpenAI 兼容的 **chat** API —— 问答很好用，当编码助手则完全不行。
+[Codex](https://github.com/openai/codex) 能规划、执行命令、改你的代码，但前提是
+API 得接受它完整的 **Responses** 方言。Codex 不停发送网关从没见过的东西，
+网关则回以这样的报错：
 
-| What Codex sends | What the gateway replies |
+| Codex 发送的 | 网关的回复 |
 |---|---|
-| `include`, `prompt_cache_key`, `client_metadata`, … | ❌ `property include should not exist` |
-| tool output containing images | ❌ `input must be a non-empty string…` |
-| `custom_tool_call` history items | ❌ not a "supported message/function item" |
-| `custom` / `namespace` tool types | ❌ only `type: "function"` allowed |
+| `include`、`prompt_cache_key`、`client_metadata` … | ❌ `property include should not exist` |
+| 工具输出里带图片 | ❌ `input must be a non-empty string…` |
+| `custom_tool_call` 历史条目 | ❌ 不是 "supported message/function item" |
+| `custom` / `namespace` 工具类型 | ❌ 只允许 `type: "function"` |
 
-**campus-agent-bridge** runs on `127.0.0.1` between them: it cleans every
-request before the gateway sees it, and rewrites every response back into
-Codex's dialect.
+**campus-agent-bridge** 就跑在两者之间的 `127.0.0.1` 上：转发前清洗请求，
+返回时把响应改写回 Codex 的方言。
 
-## How it works
+## 工作原理
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/assets/diagram-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset=".github/assets/diagram-light.svg">
-  <img alt="Codex ↔ campus-agent-bridge (127.0.0.1:8787) ↔ gateway" src=".github/assets/diagram-dark.svg" width="100%">
+  <img alt="Codex ↔ campus-agent-bridge（127.0.0.1:8787）↔ 网关" src=".github/assets/diagram-dark.svg" width="100%">
 </picture>
 
-The gateway stays the **brain**; the tools execute locally on your machine —
-the proxy only translates protocol dialects in between.
-Full walkthrough: [docs/how-it-works.md](docs/how-it-works.md).
+**网关当大脑，工具在本地跑** —— 中间的代理只负责翻译协议方言。
+完整协议走读：[docs/how-it-works.md](docs/how-it-works.md)。
 
-## Features
+## 特性
 
 | | | |
 |:---|:---|:---|
-| **Protocol sanitizer**<br>Unknown params and history noise stripped before the gateway sees them | **Images keep working**<br>Screenshots still reach the model, whatever the gateway allows | **Tools translated both ways**<br>`custom_tool_call` ⇄ `function_call`, in JSON and SSE |
-| **Sandbox unlock**<br>The Codex 0.16x config that stops silent approval rejections | **Zero dependencies**<br>One `node` binary is the entire runtime | **Battle-tested**<br>21 tests against a mock gateway enforcing real-world rules |
-| **Private by design**<br>Keys live only in gitignored `./local/` — the proxy holds none | **Isolated sessions**<br>Your `~/.codex` is never touched | **Self-diagnosis**<br>`gab doctor` checks everything in one shot |
+| **协议清洗**<br>未知参数、历史噪音，网关看不到的就不发 | **看图不坏**<br>无论网关多严格，截图照样送达模型 | **工具双向翻译**<br>`custom_tool_call` ⇄ `function_call`，JSON 与 SSE 全覆盖 |
+| **沙箱解锁**<br>Codex 0.16x 必需配置，告别静默拒绝 | **零依赖**<br>一个 `node` 就是全部运行时 | **久经考验**<br>21 个测试，假网关执行真实世界的全部规则 |
+| **隐私优先**<br>key 只存在于 gitignore 的 `./local/`，代理不持有 | **会话隔离**<br>你的 `~/.codex` 一行不动 | **自诊断**<br>`gab doctor` 一键体检 |
 
-## Quick start
+## 快速开始
 
-**Requirements** — [Node.js](https://nodejs.org) ≥ 18 ·
-[Codex CLI](https://github.com/openai/codex) ≥ 0.16x · your gateway URL + key
+**前置** — [Node.js](https://nodejs.org) ≥ 18 ·
+[Codex CLI](https://github.com/openai/codex) ≥ 0.16x · 你的网关 URL + key
 
 ```sh
 git clone https://github.com/SuperPatrick06/campus-agent-bridge.git
 cd campus-agent-bridge
-./codex-campus        # Windows: codex-campus.cmd
+./codex-campus        # Windows 用: codex-campus.cmd
 ```
 
-The **first run walks you through setup** (gateway URL → API key → model) and
-opens Codex. From then on, `codex-campus` is all you need — it starts the local
-proxy automatically and drops you into an isolated session.
+**首次运行会引导你完成配置**（网关 URL → API key → 选模型），然后打开 Codex。
+之后每天只需 `codex-campus` —— 自动拉起本地代理，直接进入隔离会话。
 
-<img src=".github/assets/terminal.svg" alt="First run — the setup wizard, then Codex" width="100%">
+<img src=".github/assets/terminal.svg" alt="首次运行 —— 配置向导，然后进入 Codex" width="100%">
 
-> **Make it global** — add the folder to your `PATH` (Windows), or
-> `ln -s "$PWD/codex-campus" /usr/local/bin/codex-campus` (macOS / Linux).
+> **全局使用** —— 把该文件夹加入 `PATH`（Windows），或
+> `ln -s "$PWD/codex-campus" /usr/local/bin/codex-campus`（macOS / Linux）。
 
 <details>
-<summary><b>Manual commands</b> — the same thing, one layer down</summary>
+<summary><b>手动命令</b> —— 同样的事，下一层拆开做</summary>
 
 ```sh
-gab init        # interactive setup — writes ./local (gitignored)
-gab codex       # identical to ./codex-campus
-gab start       # just start the proxy in the background
-gab doctor      # check config / proxy / gateway connectivity
-npm test        # run the test suite (unit + end-to-end)
+gab init        # 交互式配置 —— 写入 ./local（已 gitignore）
+gab codex       # 与 ./codex-campus 完全相同
+gab start       # 仅后台启动代理
+gab doctor      # 检查配置 / 代理 / 网关连通性
+npm test        # 跑测试（单元 + 端到端）
 ```
 
 </details>
 
-### What `init` writes
+### `init` 写了什么
 
-| File | Purpose | Ever committed? |
+| 文件 | 用途 | 会被提交吗？ |
 |:---|:---|:---:|
-| `local/config.local.json` | gateway URL, key, model, port | ❌ gitignored |
-| `local/codex-home/config.toml` | isolated Codex config → proxy | ❌ gitignored |
-| `local/codex-home/models.json` | model catalog for your gateway's model | ❌ gitignored |
+| `local/config.local.json` | 网关 URL、key、模型、端口 | ❌ gitignore |
+| `local/codex-home/config.toml` | 隔离的 Codex 配置 → 指向代理 | ❌ gitignore |
+| `local/codex-home/models.json` | 你网关模型的 catalog 条目 | ❌ gitignore |
 
-Your main `~/.codex` config is **never touched** — sessions launched via
-`codex-campus` use `CODEX_HOME=local/codex-home`, so any other providers and
-keys you keep there keep working exactly as before.
+你的主 `~/.codex` 配置**一行都不会动** —— `codex-campus` 用
+`CODEX_HOME=local/codex-home` 启动，你放在那里的其他 provider 和 key
+照常工作，互不干扰。
 
-## The three pitfalls
+## 三个经典坑
 
-Battle-tested fixes for what everyone hits with Codex × strict gateways.
-The proxy handles all three automatically:
+每个玩 Codex × 严格网关的人都会踩，本项目已全部自动处理：
 
-1. **`property include should not exist`** — Codex 0.16x sends params outside
-   the gateway's whitelist (`include`, `prompt_cache_key`, `client_metadata`, …).
-   → stripped before forwarding; `reasoning` keeps only `effort`,
-   `text` keeps only `format`.
+1. **`property include should not exist`** —— Codex 0.16x 会发送网关白名单外的参数
+   （`include`、`prompt_cache_key`、`client_metadata` …）。
+   → 转发前剥离；`reasoning` 只留 `effort`，`text` 只留 `format`。
 
-2. **`approval required by policy, but sandbox_approval is false`** — in a
-   fresh directory Codex silently auto-rejects *every* command and file read
-   with no prompt, so the agent appears dead. → the generated config sets
-   `sandbox_mode = "danger-full-access"` (+ `[windows] sandbox = "elevated"`).
+2. **`approval required by policy, but sandbox_approval is false`** —— 新目录里
+   Codex 会*静默*自动拒绝每一条命令和文件读取（连提示都没有），agent 像死了一样。
+   → 生成的配置写入 `sandbox_mode = "danger-full-access"`
+   （+ `[windows] sandbox = "elevated"`）。
 
 3. **`input must be a non-empty string or an array of supported
-   message/function items`** — viewing an image makes Codex send a non-string
-   tool output (array of content parts), which gateways reject — and extra
-   fields on those parts (like `detail:"original"`) trip the same error.
-   → output is stringified and the image rides along in a user message with
-   a whitelisted part shape, so the model still sees it.
+   message/function items`** —— 看图后 Codex 发送的工具输出是数组（含
+   `input_image`），网关只收字符串；而且 `input_image` 分片上多一个字段
+   （如 `detail:"original"`）同样触发这个报错。→ 输出被字符串化，图片挪进
+   user 消息并重建为只含 `type` + `image_url` 的分片，模型照样看得见。
 
-Every error has a full entry in [docs/troubleshooting.md](docs/troubleshooting.md)
-(error → cause → fix).
+每个报错在 [docs/troubleshooting.md](docs/troubleshooting.md) 都有完整条目
+（报错 → 原因 → 修法）。
 
-## Privacy
+## 隐私
 
-Designed so that **nothing you type in setup ever leaves `./local/`**:
+设计目标：**你在配置里输入的一切只存在于 `./local/`**：
 
-- **No keys held** — the proxy forwards Codex's `Authorization` header as-is
-- **No telemetry** — the only network calls go to *your* gateway
-- **No leaks** — no institution names, URLs or keys anywhere in the tracked source
-- **No leftovers** — `DUMP=1` debug dumps (`dump-*.json`) are gitignored — delete them when done
+- **不持钥匙** —— 代理原样转发 Codex 的 `Authorization` 头
+- **零遥测** —— 唯一的网络请求发往*你的*网关
+- **零泄漏** —— 源码里不含任何机构名、URL 或 key
+- **零残留** —— `DUMP=1` 调试转储（`dump-*.json`）已 gitignore，用完请删除
 
 <details>
-<summary><b>Publish-time self-check</b></summary>
+<summary><b>发布前自查</b></summary>
 
 ```sh
 grep -rniE 'yourname|yourschool|sk-[0-9a-f]{8}|[0-9]{1,3}(\.[0-9]{1,3}){3}' \
@@ -148,35 +141,33 @@ grep -rniE 'yourname|yourschool|sk-[0-9a-f]{8}|[0-9]{1,3}(\.[0-9]{1,3}){3}' \
 
 </details>
 
-## Development
+## 开发
 
 ```sh
-npm test                        # 21 tests: unit + mock-gateway end-to-end
+npm test                        # 21 个测试：单元 + 假网关端到端
 node --check proxy.js bin/cli.js
 ```
 
-The suite includes a **mock strict gateway** that enforces the same rules real
-gateways do — unknown params, item whitelist, string-only tool outputs,
-function-only tools — and runs the real proxy in front of it.
+测试套件内置一个**假严格网关**（执行真实网关的全部规则：未知参数、条目白名单、
+字符串工具输出、function-only 工具），并把真实代理跑在它前面。
 
-Contributions welcome — protocol fixes for other gateways especially!
+欢迎贡献 —— 尤其是其他网关的协议适配！
 
-## Disclaimer
+## 免责声明
 
-This is an independent community project, not affiliated with OpenAI or any
-institution. If your gateway belongs to a university or employer, **check that
-their terms allow automated clients** — complying is on you. Agent sessions can
-run local commands; review what the model does, as with any coding agent.
-Full text: [DISCLAIMER.md](DISCLAIMER.md) · Security: [SECURITY.md](SECURITY.md)
+本项目为独立社区项目，与 OpenAI 及任何机构无关联。如果你的网关属于学校或公司，
+**请确认其条款允许自动化客户端** —— 合规责任在你。agent 会话可以执行本地命令，
+请像对待任何编码助手一样审阅模型的行为。全文：[DISCLAIMER.md](DISCLAIMER.md) ·
+安全：[SECURITY.md](SECURITY.md)
 
-## License
+## 许可
 
-[MIT](LICENSE) © campus-agent-bridge contributors.
-Model catalog data derived from [openai/codex](https://github.com/openai/codex)
-(Apache-2.0) — see [NOTICE](NOTICE).
+[MIT](LICENSE) © campus-agent-bridge contributors。
+模型 catalog 数据派生自 [openai/codex](https://github.com/openai/codex)
+（Apache-2.0）—— 见 [NOTICE](NOTICE)。
 
 <div align="center">
 <br>
-If this unlocked your campus AI — a ⭐ star would be lovely.
+如果这个项目解锁了你的校园 AI —— 来个 ⭐ star 吧！
 <br><br>
 </div>

@@ -316,7 +316,7 @@ Privacy:
   Everything you enter stays in ./local/ (gitignored). Keys, URLs and
   institution names are never written outside ./local/.
 
-Docs: README.md / README.zh-CN.md`);
+Docs: README.md / README.en.md`);
 }
 
 (async () => {
