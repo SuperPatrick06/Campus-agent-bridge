@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="360" viewBox="0 0 880 360" fill="none">
+  <defs>
+    <style>
+      .m { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    </style>
+    <linearGradient id="winbg" x1="0" y1="0" x2="0" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101623"/>
+      <stop offset="1" stop-color="#0b0f1a"/>
+    </linearGradient>
+    <clipPath id="win">
+      <rect width="880" height="360" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#win)">
+    <rect width="880" height="360" fill="url(#winbg)"/>
+    <rect width="880" height="52" fill="#161c2b"/>
+    <path d="M 0 52 H 880" stroke="#242c3d" stroke-width="1.5"/>
+
+    <circle cx="32" cy="26" r="7" fill="#ff5f57"/>
+    <circle cx="56" cy="26" r="7" fill="#febc2e"/>
+    <circle cx="80" cy="26" r="7" fill="#28c840"/>
+    <text class="m" x="440" y="31" text-anchor="middle" font-size="15" fill="#8b949e">first run — codex-campus</text>
+  </g>
+  <rect width="880" height="360" rx="16" stroke="#2b3447" stroke-width="1.5"/>
+
+  <text class="m" x="36" y="92" font-size="17">
+    <tspan fill="#3fb950">$</tspan><tspan fill="#e6edf3"> ./codex-campus</tspan>
+  </text>
+  <text class="m" x="36" y="119" font-size="17" fill="#8b949e">campus-agent-bridge — init</text>
+  <text class="m" x="36" y="173" font-size="17">
+    <tspan fill="#8b949e">Gateway base URL: </tspan><tspan fill="#79c0ff">https://ai.example.edu/api</tspan>
+  </text>
+  <text class="m" x="36" y="200" font-size="17">
+    <tspan fill="#8b949e">API key (hidden): </tspan><tspan fill="#e6edf3">••••••••••••••••</tspan>
+  </text>
+  <text class="m" x="36" y="227" font-size="17" fill="#8b949e">Models offered by your gateway:</text>
+  <text class="m" x="36" y="254" font-size="17" xml:space="preserve">
+    <tspan fill="#8b949e">  1) </tspan><tspan fill="#e6edf3">gpt-5</tspan><tspan fill="#8b949e">    2) </tspan><tspan fill="#e6edf3">gpt-5-mini</tspan>
+  </text>
+  <text class="m" x="36" y="281" font-size="17">
+    <tspan fill="#8b949e">Pick by number, or type a model id: </tspan><tspan fill="#e6edf3">1</tspan>
+  </text>
+  <text class="m" x="36" y="308" font-size="17">
+    <tspan fill="#3fb950">[gab]</tspan><tspan fill="#8b949e"> config written to ./local (gitignored)</tspan>
+  </text>
+  <text class="m" x="36" y="335" font-size="17">
+    <tspan fill="#3fb950">[gab]</tspan><tspan fill="#8b949e"> proxy started: 127.0.0.1:8787 → </tspan><tspan fill="#79c0ff">ai.example.edu</tspan>
+  </text>
+</svg>

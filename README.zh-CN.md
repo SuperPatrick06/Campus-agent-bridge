@@ -3,22 +3,14 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset=".github/assets/banner-light.svg">
-  <img alt="campus-agent-bridge — 把只有 chat 能力的 AI 网关变成真正的 agent" src=".github/assets/banner-dark.svg" width="100%">
+  <img alt="campus-agent-bridge — 架在 Codex 与网关之间的桥" src=".github/assets/banner-dark.svg" width="100%">
 </picture>
 
 ### 把只有 chat 能力的 AI 网关，变成真正的 **agent**
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE)
-[![Node.js ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-22c55e?style=flat-square)](https://nodejs.org)
-[![Dependencies](https://img.shields.io/badge/dependencies-0-a855f7?style=flat-square)](package.json)
-[![Tests](https://img.shields.io/badge/tests-21%20passing-22c55e?style=flat-square)](test/run.js)
-
-学校 / 公司发给你一个 OpenAI 兼容的 **chat** API —— 问答很好用，当编码助手则完全不行。
-[Codex](https://github.com/openai/codex) 能规划、执行命令、改你的代码，但前提是
-API 得接受它完整的 **Responses** 方言。它们说的是同一种协议的两种方言 ——
-这个小巧的本地代理负责居中翻译。
-
 **网关零改动 · 无云端中转 · 零 npm 依赖**
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE) [![Node.js ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-22c55e?style=flat-square)](https://nodejs.org) [![Dependencies](https://img.shields.io/badge/dependencies-0-a855f7?style=flat-square)](package.json) [![Tests](https://img.shields.io/badge/tests-21%20passing-22c55e?style=flat-square)](test/run.js)
 
 [English](README.md) · **简体中文**
 
@@ -30,8 +22,10 @@ API 得接受它完整的 **Responses** 方言。它们说的是同一种协议�
 
 ## 痛点
 
-机构的 AI 平台（学校、公司）通常只暴露 OpenAI API 的严格子集：聊天够用，
-当 agent 则处处碰壁。Codex 不停发送网关从没见过的东西，网关则回以这样的报错：
+学校 / 公司发给你一个 OpenAI 兼容的 **chat** API —— 问答很好用，当编码助手则完全不行。
+[Codex](https://github.com/openai/codex) 能规划、执行命令、改你的代码，但前提是
+API 得接受它完整的 **Responses** 方言。Codex 不停发送网关从没见过的东西，
+网关则回以这样的报错：
 
 | Codex 发送的 | 网关的回复 |
 |---|---|
@@ -45,25 +39,22 @@ API 得接受它完整的 **Responses** 方言。它们说的是同一种协议�
 
 ## 工作原理
 
-```
-┌────────────┐  Responses API   ┌───────────────────────────┐  严格子集  ┌─────────┐
-│   Codex    │ ───────────────► │ campus-agent-bridge 代理  │ ─────────► │ 网关    │
-│ agent+工具 │ ◄──────────────── │   127.0.0.1:8787          │ ◄───────── │ (大脑)  │
-└────────────┘  Codex 方言      └───────────────────────────┘  干净方言  └─────────┘
-        ▲                                                       ▲
-        └── 工具在本地执行（shell、文件编辑、apply_patch）      └── 你机构的 API
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/diagram-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset=".github/assets/diagram-light.svg">
+  <img alt="Codex ↔ campus-agent-bridge（127.0.0.1:8787）↔ 网关" src=".github/assets/diagram-dark.svg" width="100%">
+</picture>
 
-**网关当大脑，工具在本地跑。**
+**网关当大脑，工具在本地跑** —— 中间的代理只负责翻译协议方言。
 完整协议走读：[docs/how-it-works.md](docs/how-it-works.md)。
 
 ## 特性
 
 | | | |
 |:---|:---|:---|
-| **协议清洗**<br>剥离未知参数、裁剪 `reasoning` / `text`、白名单历史条目、摊平工具命名空间 | **看图不坏**<br>图片工具输出搭 user 消息的便车 —— 严格网关唯一接受 `input_image` 的地方 —— 模型照样能"看见"截图 | **工具双向翻译**<br>请求和响应两侧 `custom_tool_call` ⇄ `function_call`，JSON **和** SSE 流都覆盖 |
-| **沙箱解锁**<br>生成 Codex 0.16x 必需的配置 —— 否则审批会被*静默*自动拒绝，agent 看起来像死了 | **零依赖**<br>一个 `node` 就是全部运行时：无 `npm install`，无供应链 | **久经考验**<br>21 个测试，含一次完整端到端 —— 前面跑真实代理，后面是执行全部真实规则的假网关 |
-| **隐私优先**<br>URL、key、模型只存在于被 gitignore 的 `./local/` —— 代理不持有 key，零遥测 | **会话隔离**<br>你的 `~/.codex` 一行不动 —— `codex-campus` 用独立的 `CODEX_HOME` 启动 | **自诊断**<br>`gab doctor` 一键检查配置 / 代理 / 网关连通性 |
+| **协议清洗**<br>未知参数、历史噪音，网关看不到的就不发 | **看图不坏**<br>无论网关多严格，截图照样送达模型 | **工具双向翻译**<br>`custom_tool_call` ⇄ `function_call`，JSON 与 SSE 全覆盖 |
+| **沙箱解锁**<br>Codex 0.16x 必需配置，告别静默拒绝 | **零依赖**<br>一个 `node` 就是全部运行时 | **久经考验**<br>21 个测试，假网关执行真实世界的全部规则 |
+| **隐私优先**<br>key 只存在于 gitignore 的 `./local/`，代理不持有 | **会话隔离**<br>你的 `~/.codex` 一行不动 | **自诊断**<br>`gab doctor` 一键体检 |
 
 ## 快速开始
 
@@ -78,6 +69,8 @@ cd campus-agent-bridge
 
 **首次运行会引导你完成配置**（网关 URL → API key → 选模型），然后打开 Codex。
 之后每天只需 `codex-campus` —— 自动拉起本地代理，直接进入隔离会话。
+
+<img src=".github/assets/terminal.svg" alt="首次运行 —— 配置向导，然后进入 Codex" width="100%">
 
 > **全局使用** —— 把该文件夹加入 `PATH`（Windows），或
 > `ln -s "$PWD/codex-campus" /usr/local/bin/codex-campus`（macOS / Linux）。

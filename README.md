@@ -3,23 +3,14 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset=".github/assets/banner-light.svg">
-  <img alt="campus-agent-bridge — give any chat-only AI gateway real agent powers" src=".github/assets/banner-dark.svg" width="100%">
+  <img alt="campus-agent-bridge — a bridge between Codex and your gateway" src=".github/assets/banner-dark.svg" width="100%">
 </picture>
 
 ### Give any chat-only AI gateway real **agent** powers
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE)
-[![Node.js ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-22c55e?style=flat-square)](https://nodejs.org)
-[![Dependencies](https://img.shields.io/badge/dependencies-0-a855f7?style=flat-square)](package.json)
-[![Tests](https://img.shields.io/badge/tests-21%20passing-22c55e?style=flat-square)](test/run.js)
-
-Your school or company hands you an OpenAI-compatible **chat** API — great for
-asking questions, useless as a coding agent. [Codex](https://github.com/openai/codex)
-can plan, run commands and edit files, but only if the endpoint accepts its full
-**Responses** dialect. They speak two dialects of the same protocol — this tiny
-local proxy translates between them.
-
 **Zero gateway changes · Zero cloud relay · Zero npm dependencies**
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square)](LICENSE) [![Node.js ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-22c55e?style=flat-square)](https://nodejs.org) [![Dependencies](https://img.shields.io/badge/dependencies-0-a855f7?style=flat-square)](package.json) [![Tests](https://img.shields.io/badge/tests-21%20passing-22c55e?style=flat-square)](test/run.js)
 
 **English** · [简体中文](README.zh-CN.md)
 
@@ -31,10 +22,11 @@ local proxy translates between them.
 
 ## Why
 
-Institutional AI platforms (universities, companies) usually expose a strict
-subset of the OpenAI API: enough for chat, not enough for an agent. Codex keeps
-sending things the gateway has never heard of — and the gateway answers with
-errors like these:
+Your school or company hands you an OpenAI-compatible **chat** API — great for
+asking questions, useless as a coding agent. [Codex](https://github.com/openai/codex)
+can plan, run commands and edit files, but only if the endpoint accepts its full
+**Responses** dialect. Codex keeps sending things the gateway has never heard
+of — and the gateway answers with errors like these:
 
 | What Codex sends | What the gateway replies |
 |---|---|
@@ -49,25 +41,23 @@ Codex's dialect.
 
 ## How it works
 
-```
-┌────────────┐  Responses API   ┌───────────────────────────┐  strict subset  ┌─────────┐
-│   Codex    │ ───────────────► │ campus-agent-bridge proxy │ ──────────────► │ gateway │
-│ agent+tools│ ◄─────────────── │   127.0.0.1:8787          │ ◄────────────── │ (brain) │
-└────────────┘  Codex dialect   └───────────────────────────┘  clean dialect  └─────────┘
-        ▲                                                       ▲
-        └── tools run locally (shell, files, apply_patch)       └── your institution's API
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/diagram-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset=".github/assets/diagram-light.svg">
+  <img alt="Codex ↔ campus-agent-bridge (127.0.0.1:8787) ↔ gateway" src=".github/assets/diagram-dark.svg" width="100%">
+</picture>
 
-The gateway stays the **brain**; the tools execute locally on your machine.
-Full protocol walkthrough: [docs/how-it-works.md](docs/how-it-works.md).
+The gateway stays the **brain**; the tools execute locally on your machine —
+the proxy only translates protocol dialects in between.
+Full walkthrough: [docs/how-it-works.md](docs/how-it-works.md).
 
 ## Features
 
 | | | |
 |:---|:---|:---|
-| **Protocol sanitizer**<br>Strips unknown params, trims `reasoning` / `text`, whitelists history items, flattens tool namespaces | **Images keep working**<br>Image tool outputs ride along in user messages — the one shape strict gateways accept — so the model still sees your screenshots | **Tools translated both ways**<br>`custom_tool_call` ⇄ `function_call` on request *and* response paths, in JSON **and** SSE streams |
-| **Sandbox unlock**<br>Generates the config Codex 0.16x requires — without it, approvals are silently auto-rejected and the agent looks dead | **Zero dependencies**<br>One `node` binary is the entire runtime: no `npm install`, no supply chain | **Battle-tested**<br>21 tests, including a full end-to-end run in front of a mock gateway that enforces every real-world rule |
-| **Private by design**<br>URL, key and model live only in gitignored `./local/` — the proxy holds no keys and phones nobody | **Isolated sessions**<br>Your `~/.codex` is never touched — `codex-campus` boots Codex with its own `CODEX_HOME` | **Self-diagnosis**<br>`gab doctor` checks config, proxy and gateway connectivity in one shot |
+| **Protocol sanitizer**<br>Unknown params and history noise stripped before the gateway sees them | **Images keep working**<br>Screenshots still reach the model, whatever the gateway allows | **Tools translated both ways**<br>`custom_tool_call` ⇄ `function_call`, in JSON and SSE |
+| **Sandbox unlock**<br>The Codex 0.16x config that stops silent approval rejections | **Zero dependencies**<br>One `node` binary is the entire runtime | **Battle-tested**<br>21 tests against a mock gateway enforcing real-world rules |
+| **Private by design**<br>Keys live only in gitignored `./local/` — the proxy holds none | **Isolated sessions**<br>Your `~/.codex` is never touched | **Self-diagnosis**<br>`gab doctor` checks everything in one shot |
 
 ## Quick start
 
@@ -83,6 +73,8 @@ cd campus-agent-bridge
 The **first run walks you through setup** (gateway URL → API key → model) and
 opens Codex. From then on, `codex-campus` is all you need — it starts the local
 proxy automatically and drops you into an isolated session.
+
+<img src=".github/assets/terminal.svg" alt="First run — the setup wizard, then Codex" width="100%">
 
 > **Make it global** — add the folder to your `PATH` (Windows), or
 > `ln -s "$PWD/codex-campus" /usr/local/bin/codex-campus` (macOS / Linux).
