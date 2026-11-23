@@ -65,7 +65,7 @@ Full walkthrough: [docs/how-it-works.md](docs/how-it-works.md).
 [Codex CLI](https://github.com/openai/codex) ≥ 0.16x · your gateway URL + key
 
 ```sh
-git clone https://github.com/SuperPatrick06/campus-agent-bridge.git
+git clone https://github.com/SuperPatrick06/Campus-agent-bridge.git
 cd campus-agent-bridge
 ./codex-campus        # Windows: codex-campus.cmd
 ```
@@ -174,6 +174,16 @@ Full text: [DISCLAIMER.md](DISCLAIMER.md) · Security: [SECURITY.md](SECURITY.md
 [MIT](LICENSE) © campus-agent-bridge contributors.
 Model catalog data derived from [openai/codex](https://github.com/openai/codex)
 (Apache-2.0) — see [NOTICE](NOTICE).
+
+## Star History
+
+<a href="https://star-history.com/#SuperPatrick06/Campus-agent-bridge&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=SuperPatrick06/Campus-agent-bridge&type=Date">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=SuperPatrick06/Campus-agent-bridge&type=Date">
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=SuperPatrick06/Campus-agent-bridge&type=Date" width="100%">
+  </picture>
+</a>
 
 <div align="center">
 <br>

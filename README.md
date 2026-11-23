@@ -62,7 +62,7 @@ API 得接受它完整的 **Responses** 方言。Codex 不停发送网关从没�
 [Codex CLI](https://github.com/openai/codex) ≥ 0.16x · 你的网关 URL + key
 
 ```sh
-git clone https://github.com/SuperPatrick06/campus-agent-bridge.git
+git clone https://github.com/SuperPatrick06/Campus-agent-bridge.git
 cd campus-agent-bridge
 ./codex-campus        # Windows 用: codex-campus.cmd
 ```
@@ -165,6 +165,16 @@ node --check proxy.js bin/cli.js
 [MIT](LICENSE) © campus-agent-bridge contributors。
 模型 catalog 数据派生自 [openai/codex](https://github.com/openai/codex)
 （Apache-2.0）—— 见 [NOTICE](NOTICE)。
+
+## Star History
+
+<a href="https://star-history.com/#SuperPatrick06/Campus-agent-bridge&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=SuperPatrick06/Campus-agent-bridge&type=Date">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=SuperPatrick06/Campus-agent-bridge&type=Date">
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=SuperPatrick06/Campus-agent-bridge&type=Date" width="100%">
+  </picture>
+</a>
 
 <div align="center">
 <br>
